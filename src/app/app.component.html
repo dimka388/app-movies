@@ -1,13 +1,44 @@
 <div id="wrapper">
+	<div class="svg-holder" (window:resize)="onResize($event)"></div>
 	<div class="top-list">
 		<ol class="list">
-			<li *ngFor="let item of list.results"
+			<li *ngFor="let item of movies.list"
+				[ngClass]="{ 'active': details && details.id === item.id }"
+				[ngClass]="{ 'favorite': isFavoriteId(item.id) }"
 				(click)="itemClickHandler(item)">
 				{{item.title}}
 			</li>
 		</ol>
+		<ul class="list">
+			<li *ngFor="let item of movies.favorite">
+				{{item.id}}
+			</li>
+		</ul>
 	</div>
-	<popup-component [details]=details></popup-component>
-	<graph-component [list]=list.results></graph-component>
+	<div class="popup-holder" [ngClass]="{ 'active': details }">
+		<div class="details-box" *ngIf="details">
+			<span class="closer"
+				(click)="closerClickHandler()">X</span>
+			<img class="poster" src="http://image.tmdb.org/t/p/w500{{details.poster_path}}">
+			<dl class="info">
+				<dt>Title:</dt>
+				<dd>{{details.title}}</dd>
+				<dt>Overview:</dt>
+				<dd>{{details.overview}}</dd>
+				<dt>Release:</dt>
+				<dd>{{details.release_date}}</dd>
+				<dt>Rating:</dt>
+				<dd>{{details.vote_average}}</dd>
+				<dt>Genres:</dt>
+				<dd><span *ngFor="let genre of details.genres; let index = index">{{(index >= 1 ? ', ' : '') + genre.name}}</span></dd>
+				<dt>Country:</dt>
+				<dd><span *ngFor="let country of details.production_countries; let index = index">{{(index >= 1 ? ', ' : '') + country.name}}</span></dd>
+				<dt>Favorite:</dt>
+				<dd><button class="btn-add" (click)="toggleFavorite(details.id)">Add to favorite list</button></dd>
+			</dl>
+		</div>
+		<div class="overlay"
+			(click)="closerClickHandler()"></div>
+	</div>
 </div>
 
