@@ -66,7 +66,7 @@ var AppComponent = (function () {
         this.settings = {
             jsonUrl: 'assets/movies.json',
             circlePadding: 10,
-            circleMaxRadius: 8
+            circleMaxRadius: 7
         };
         this.movies = {
             favorite: localStorage.favorite ? localStorage.favorite.split(',') : []

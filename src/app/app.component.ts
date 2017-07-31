@@ -13,7 +13,7 @@ export class AppComponent {
 	settings: any = {
 		jsonUrl: 'assets/movies.json',
 		circlePadding: 10,
-		circleMaxRadius: 8
+		circleMaxRadius: 7
 	};
 	movies: Object = {
 		favorite: localStorage.favorite ? localStorage.favorite.split(',') : []
