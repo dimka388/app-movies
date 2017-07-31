@@ -2,36 +2,30 @@ import { Component } from '@angular/core';
 import {Http} from '@angular/http';
 import * as d3 from "d3";
 
-const movies: Object = {};
-const details: Object = null;
-const settings: any = {
-	favoritesUrl: 'https://597e464950cf410011fd016d.mockapi.io/favorites',
-	moviedbUrl: 'https://api.themoviedb.org/3',
-	apiKey: 'c0d838a65beba716e98173dd0eb8892b',
-	circlePadding: 10,
-	circleMaxRadius: 12
-}
-
 @Component({
 	selector: 'app',
 	moduleId: module.id,
-	templateUrl: './app.component.html',
-	styleUrls: ['./app.component.scss']
+	templateUrl: 'app.component.html',
+	styleUrls: ['app.component.scss']
 })
 
 export class AppComponent {
-	movies = movies;
-	details = details;
+	settings: any = {
+		jsonUrl: '../assets/movies.json',
+		circlePadding: 10,
+		circleMaxRadius: 8
+	};
+	movies: Object = {
+		favorite: localStorage.favorite ? localStorage.favorite.split(',') : []
+	};
+	details: Object = null;
+	listOpened: boolean = false;
 
 	constructor(private http:Http) {
-		this.http.get(settings.moviedbUrl + '/discover/movie?sort_by=popularity.desc&api_key=' + settings.apiKey)
+		this.http.get(this.settings.jsonUrl)
 			.subscribe(res => {
-				this.movies['list'] = res.json().results;
+				this.movies['list'] = res.json().data.movies;
 				this.drawCircles();
-			});
-		this.http.get(settings.favoritesUrl)
-			.subscribe(res => {
-				this.movies['favorite'] = res.json();
 			});
 	}
 
@@ -68,7 +62,7 @@ export class AppComponent {
 		const collide = (alpha) => {
 			let quadtree = d3.geom.quadtree(nodes);
 			return (d) => {
-				let r = d.radius + settings.circleMaxRadius + settings.circlePadding,
+				let r = d.radius + this.settings.circleMaxRadius + this.settings.circlePadding,
 					nx1 = d.x - r,
 					nx2 = d.x + r,
 					ny1 = d.y - r,
@@ -78,7 +72,7 @@ export class AppComponent {
 						let x = d.x - quad.point.x,
 							y = d.y - quad.point.y,
 							l = Math.sqrt(x * x + y * y),
-							r = d.radius + quad.point.radius + settings.circlePadding;
+							r = d.radius + quad.point.radius + this.settings.circlePadding;
 						if (l < r) {
 							l = (l - r) / l * alpha;
 							d.x -= x *= l;
@@ -96,8 +90,8 @@ export class AppComponent {
 			height = svgHolder.clientHeight;
 
 		let nodes = this.movies['list'].map((obj, index) => {
-			let radius = obj.vote_average * settings.circleMaxRadius,
-				data = {cluster: index, radius: radius, title: obj.title, id: obj.id};
+			let radius = obj.rating * this.settings.circleMaxRadius,
+				data = {cluster: index, radius: radius, title: obj.title, id: obj.idIMDB, details: obj};
 				if (!circles[index] || (radius > circles[index].radius)) {
 					circles[index] = data;
 				}
@@ -124,7 +118,7 @@ export class AppComponent {
 			.append("g")
 			.call(force.drag)
 			.on("click", (d) => {
-				this.itemClickHandler(d);
+				this.itemClickHandler(d.details);
 			});
 
 		circle.append("circle")
@@ -156,47 +150,28 @@ export class AppComponent {
 	}
 
 	onResize(event) {
-		console.log('resize')
+		console.log('need refresh svg')
 	}
 
 	itemClickHandler(item: any) {
-		this.http.get(settings.moviedbUrl + '/movie/' + item.id + '?api_key=' + settings.apiKey + '&language=en-US')
-			.subscribe(res => this.details = res.json());
+		this.details = item;
 	}
 
 	closerClickHandler() {
 		this.details = null;
 	}
 
-	isFavoriteId(movieId: number) {
-		return this.movies['favorite'].filter((obj) => {
-			if (movieId === obj.movie) {
-				return true;
-			}
-		}).length;
+	openerClickHandler() {
+		this.listOpened = !this.listOpened;
 	}
 
-	toggleFavorite(movieId: number) {
-		if (this.movies['favorite'].length) {
-			if (this.isFavoriteId(movieId)) {
-				this.http.delete(settings.favoritesUrl+'/'+movieId)
-					.subscribe(res => {
-						// this.movies['favorite'] = res.json();
-						console.log('delete', this.movies['favorite']);
-					});
-			} else {
-				this.http.post(settings.favoritesUrl, {movie: movieId})
-					.subscribe(res => {
-						// this.movies['favorite'] = res.json();
-						console.log('post', this.movies['favorite']);
-					});
-			}
+	toggleFavorite(movieId: string) {
+		let index = this.movies['favorite'].indexOf(movieId);
+		if (index > -1) {
+			this.movies['favorite'].splice(index, 1);
 		} else {
-			this.http.post(settings.favoritesUrl, {movie: movieId})
-				.subscribe(res => {
-					// this.movies['favorite'] = res.json();
-					console.log('post', res.json());
-				});
+			this.movies['favorite'].push(movieId);
 		}
+		localStorage.setItem('favorite', this.movies['favorite'].join(','));
 	}
 }

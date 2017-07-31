@@ -1,40 +1,57 @@
 <div id="wrapper">
 	<div class="svg-holder" (window:resize)="onResize($event)"></div>
-	<div class="top-list">
+	<div class="top-list" [ngClass]="{ 'active': listOpened }">
+		<button class="opener"
+			(click)="openerClickHandler()"></button>
 		<ol class="list">
 			<li *ngFor="let item of movies.list"
-				[ngClass]="{ 'active': details && details.id === item.id }"
-				[ngClass]="{ 'favorite': isFavoriteId(item.id) }"
-				(click)="itemClickHandler(item)">
-				{{item.title}}
+				[ngClass]="{
+					'favorite': movies.favorite.indexOf(item.idIMDB) > -1,
+					'active': details && details.idIMDB === item.idIMDB
+				}">
+				<button class="btn-opener"
+					(click)="itemClickHandler(item)">{{item.title}}</button>
+				<button class="btn-favorite"
+					(click)="toggleFavorite(item.idIMDB)">
+					<i class="icon-star"></i>
+				</button>
 			</li>
 		</ol>
-		<ul class="list">
-			<li *ngFor="let item of movies.favorite">
-				{{item.id}}
-			</li>
-		</ul>
 	</div>
 	<div class="popup-holder" [ngClass]="{ 'active': details }">
 		<div class="details-box" *ngIf="details">
-			<span class="closer"
-				(click)="closerClickHandler()">X</span>
-			<img class="poster" src="http://image.tmdb.org/t/p/w500{{details.poster_path}}">
+			<button class="closer"
+				(click)="closerClickHandler()">X</button>
+			<img class="poster" src="{{details.urlPoster}}">
 			<dl class="info">
 				<dt>Title:</dt>
 				<dd>{{details.title}}</dd>
-				<dt>Overview:</dt>
-				<dd>{{details.overview}}</dd>
-				<dt>Release:</dt>
-				<dd>{{details.release_date}}</dd>
+				<dt>Info:</dt>
+				<dd>{{details.plot}}</dd>
+				<dt>Year:</dt>
+				<dd>{{details.year}}</dd>
 				<dt>Rating:</dt>
-				<dd>{{details.vote_average}}</dd>
+				<dd>{{details.rating}}</dd>
 				<dt>Genres:</dt>
-				<dd><span *ngFor="let genre of details.genres; let index = index">{{(index >= 1 ? ', ' : '') + genre.name}}</span></dd>
-				<dt>Country:</dt>
-				<dd><span *ngFor="let country of details.production_countries; let index = index">{{(index >= 1 ? ', ' : '') + country.name}}</span></dd>
+				<dd>
+					<span
+						*ngFor="let genre of details.genres; let index = index">{{(index >= 1 ? ', ' : '') + genre}}</span>
+				</dd>
+				<dt>Countries:</dt>
+				<dd>
+					<span
+						*ngFor="let country of details.countries; let index = index">{{(index >= 1 ? ', ' : '') + country}}</span>
+				</dd>
+				<dt>Directors:</dt>
+				<dd>
+					<a
+						*ngFor="let director of details.directors; let index = index"
+						href="http://www.imdb.com/name/{{ director.id }}/">{{(index >= 1 ? ', ' : '') + director.name}}</a>
+				</dd>
 				<dt>Favorite:</dt>
-				<dd><button class="btn-add" (click)="toggleFavorite(details.id)">Add to favorite list</button></dd>
+				<dd><button class="btn-favorite"
+					[ngClass]="{ 'active': movies.favorite.indexOf(details.idIMDB) > -1}"
+					(click)="toggleFavorite(details.idIMDB)"><i class="icon-star"></i></button></dd>
 			</dl>
 		</div>
 		<div class="overlay"
