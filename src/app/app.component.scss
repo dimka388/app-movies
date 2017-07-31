@@ -93,6 +93,7 @@
 				padding: 0;
 				outline: none;
 				text-align: left;
+				cursor: pointer;
 				&.btn-favorite{
 					position: absolute;
 					top: 50%;
@@ -164,6 +165,9 @@
 				float: left;
 				min-width: 100px;
 				font-weight: bold;
+				&.favorite{
+					line-height: 30px;
+				}
 			}
 			dd{
 				overflow: hidden;

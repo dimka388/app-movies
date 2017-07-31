@@ -45,10 +45,11 @@
 				<dt>Directors:</dt>
 				<dd>
 					<a
+						target="_blank"
 						*ngFor="let director of details.directors; let index = index"
 						href="http://www.imdb.com/name/{{ director.id }}/">{{(index >= 1 ? ', ' : '') + director.name}}</a>
 				</dd>
-				<dt>Favorite:</dt>
+				<dt class="favorite">Favorite:</dt>
 				<dd><button class="btn-favorite"
 					[ngClass]="{ 'active': movies.favorite.indexOf(details.idIMDB) > -1}"
 					(click)="toggleFavorite(details.idIMDB)"><i class="icon-star"></i></button></dd>

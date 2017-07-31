@@ -11,7 +11,7 @@ import * as d3 from "d3";
 
 export class AppComponent {
 	settings: any = {
-		jsonUrl: '../assets/movies.json',
+		jsonUrl: 'assets/movies.json',
 		circlePadding: 10,
 		circleMaxRadius: 8
 	};
@@ -116,6 +116,7 @@ export class AppComponent {
 
 		let circle = elem.enter()
 			.append("g")
+			.style('cursor','pointer')
 			.call(force.drag)
 			.on("click", (d) => {
 				this.itemClickHandler(d.details);
